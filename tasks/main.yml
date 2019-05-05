@@ -1,0 +1,23 @@
+---
+- name: Setup service units
+  become: yes
+  template:
+    src: container.service.j2
+    dest: /etc/systemd/system/{{ item.name }}.service
+  loop: "{{ docker_services }}"
+
+- name: Enable service units
+  become: yes
+  systemd:
+    daemon_reload: yes
+    name: "{{ item.name }}"
+    enabled: yes
+    masked: no
+  loop: "{{ docker_services }}"
+
+- name: Start service units
+  become: yes
+  systemd:
+    name: "{{ item.name }}"
+    state: restarted    
+  loop: "{{ docker_services }}"

@@ -1,0 +1,20 @@
+[Unit]
+Description={{ item.description }}
+After=docker.service
+Requires=docker.service
+
+[Service]
+{% if 'environment' in item %}
+{% for key, value in item.environment.items() %}
+Environment={{ key }}={{ value }}
+{% endfor %}
+{% endif %}
+TimeoutStartSec=0
+Restart=always
+ExecStartPre=-/usr/bin/docker stop {{ item.name }}
+ExecStartPre=-/usr/bin/docker rm {{ item.name }}
+ExecStartPre=/usr/bin/docker pull {{ item.image }}
+ExecStart=/usr/bin/docker run --rm --name {{ item.name }} {{ item.run_args | default('') }} {{ item.image }}
+
+[Install]
+WantedBy=multi-user.target
